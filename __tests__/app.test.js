@@ -3,6 +3,7 @@ const db = require("../db/connection.js");
 const request = require('supertest');
 const seed = require("../db/seeds/seed.js")
 const data = require("../db/data/test-data/index.js");
+
 beforeEach(() => {
   return seed(data);
 });
@@ -10,6 +11,7 @@ beforeEach(() => {
 afterAll(() => {
   return db.end();
 })
+
 describe('GET /*', () => {
   it('should return a status 404 when passed a path that doesnt exist', () => {
     return request(app)
@@ -19,7 +21,8 @@ describe('GET /*', () => {
         expect(body.message).toBe('404: Path not found')
       })
   })
-})
+
+
 describe("GET /api/topics", () => {
   it('should return a 200 status code', () => {
     return request(app)
@@ -41,11 +44,11 @@ describe("GET /api/topics", () => {
     return request(app)
       .get("/api/toooopics")
       .expect(404)
-      .then(({ body }) => {
+      .then(({body}) => {
         expect(body).not.toBe(undefined);
         expect(body.message).toBe('404: Path not found');
       })
-  })
+  
 })
 
 describe('GET /api', () => {
@@ -64,4 +67,5 @@ describe('GET /api', () => {
         expect(body.endpoints).toEqual(file);
       })
   })
+
 })

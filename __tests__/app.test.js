@@ -129,3 +129,71 @@ describe('GET /api/articles/:article_id', () => {
       })
   })
 })
+describe('GET /api/articles', () => {
+  it('should return with a status 200 and return an array filled with article objects', () => {
+    return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(13);
+        body.articles.forEach(article => {
+          expect(article).toHaveProperty('author', expect.any(String))
+          expect(article).toHaveProperty('title', expect.any(String))
+          expect(article).toHaveProperty('article_id', expect.any(Number))
+          expect(article).toHaveProperty('topic', expect.any(String))
+          expect(article).toHaveProperty('created_at', expect.any(String))
+          expect(article).toHaveProperty('votes', expect.any(Number))
+          expect(article).toHaveProperty('article_img_url', expect.any(String))
+          expect(article).toHaveProperty('comment_count', expect.any(String))
+        })
+      })
+  })
+  it('should be ordered by date in descending order', () => {
+    return request(app)
+      .get('/api/articles')
+      .then(({ body }) => {
+        expect(body.articles[0].created_at).toBe('2020-11-03T09:12:00.000Z')
+        expect(body.articles[12].created_at).toBe('2020-01-07T14:08:00.000Z')
+      })
+  })
+  describe('GET /api/articles when the table is empty', () => {
+    beforeEach(() => {
+      return db.query(`DROP TABLE IF EXISTS comments;`)
+        .then(() => {
+          return db.query(`DROP TABLE IF EXISTS articles;`);
+        })
+        .then(() => {
+          return db.query(`
+      CREATE TABLE articles (
+        article_id SERIAL PRIMARY KEY,
+        title VARCHAR NOT NULL,
+        topic VARCHAR NOT NULL REFERENCES topics(slug),
+        author VARCHAR NOT NULL REFERENCES users(username),
+        body VARCHAR NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        votes INT DEFAULT 0 NOT NULL,
+        article_img_url VARCHAR DEFAULT 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700'
+      );`);
+        })
+        .then(() => {
+          return db.query(`
+      CREATE TABLE comments (
+        comment_id SERIAL PRIMARY KEY,
+        body VARCHAR NOT NULL,
+        article_id INT REFERENCES articles(article_id) NOT NULL,
+        author VARCHAR REFERENCES users(username) NOT NULL,
+        votes INT DEFAULT 0 NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );`);
+        })
+    })
+    it('should return a 404 and appropriate message when no results are returned', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.message).toBe('404: No articles found')
+        })
+    })
+  })
+})

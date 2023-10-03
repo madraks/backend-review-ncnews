@@ -17,17 +17,18 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "description": "serves an array of all articles. default ordering by date created, in descending order",
+    "queries": ["author", "topic", "sort_by = created_at", "order = desc"],
     "exampleResponse": {
       "articles": [
         {
+          "article_id": 1,
+          "author": "weegembump",
           "title": "Seafood substitutions are increasing",
           "topic": "cooking",
-          "author": "weegembump",
-          "body": "Text from the article..",
           "created_at": "2018-05-30T15:59:13.341Z",
           "votes": 0,
+          "article_img_url": "linktoimage.com/image.jpg",
           "comment_count": 6
         }
       ]

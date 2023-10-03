@@ -196,3 +196,55 @@ describe('GET /api/articles', () => {
     })
   })
 })
+describe('GET /api/articles/:article_id/comments', () => {
+  it('should receive a status 200 when requested with a valid id, and return an array of comments sorted from most recent', () => {
+    return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comments.length).toBe(11);
+        expect(body.comments).toBeSortedBy('created_at', {descending: true})
+
+        body.comments.forEach((comment) => {
+          expect(comment).toHaveProperty('comment_id', expect.any(Number))
+          expect(comment).toHaveProperty('votes', expect.any(Number))
+          expect(comment).toHaveProperty('created_at', expect.any(String))
+          expect(comment).toHaveProperty('author', expect.any(String))
+          expect(comment).toHaveProperty('body', expect.any(String))
+          expect(comment).toHaveProperty('article_id', expect.any(Number))
+        })
+      })
+  })
+  it('should return an empty array when the article doesnt exist, but with a 200 status when passed a valid ID format', () => {
+    return request(app)
+      .get('/api/articles/272/comments')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comments).toEqual([])
+      })
+  })
+  it('should return a status 400 and an appropriate message when the article_id is not a number', () => {
+    return request(app)
+      .get('/api/articles/notanumber/comments')
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe('400: Bad request, article ID should be a number')
+      })
+  })
+  it('should return a status 400 when passed with a REAL', () => {
+    return request(app)
+      .get('/api/articles/1.2/comments')
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe('400: Invalid ID');
+      })
+  })
+  it('should not be subject to a SQL injection and will receive a status 400 with an appropriate message', () => {
+    return request(app)
+      .get('/api/articles/1; DROP DATABASE nc_news;/comments')
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe('400: Bad request, article ID should be a number')
+      })
+  })
+})

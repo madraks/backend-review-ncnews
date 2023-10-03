@@ -46,3 +46,18 @@ exports.fetchAllArticles = (sortby = 'date', order = 'DESC') => {
       }
     })
 }
+
+exports.fetchAllCommentsByArticleId = (article_id) => {
+
+  if(isNaN(article_id)) {
+    return Promise.reject({status:400, message: '400: Bad request, article ID should be a number'})
+  }
+  let query = `SELECT * FROM comments
+  WHERE article_id = $1
+  ORDER BY comments.created_at DESC`;
+
+  return db.query(query, [article_id])
+    .then((result) => {
+      return result.rows;
+    })
+}

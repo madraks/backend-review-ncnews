@@ -39,7 +39,6 @@ exports.fetchAllArticles = (sortby = 'date', order = 'DESC') => {
 
   return db.query(query)
     .then((result) => {
-      console.log(result);
       if(result.rows.length === 0) {
         return Promise.reject({status: 404, message: '404: No articles found'})
       } else {

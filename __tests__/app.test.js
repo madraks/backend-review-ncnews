@@ -152,8 +152,7 @@ describe('GET /api/articles', () => {
     return request(app)
       .get('/api/articles')
       .then(({ body }) => {
-        expect(body.articles[0].created_at).toBe('2020-11-03T09:12:00.000Z')
-        expect(body.articles[12].created_at).toBe('2020-01-07T14:08:00.000Z')
+        expect(body.articles).toBeSortedBy('created_at', {descending: true})
       })
   })
   describe('GET /api/articles when the table is empty', () => {

@@ -15,7 +15,4 @@ exports.fetchArticleById = (articleId) => {
       }
       return result.rows[0];
     })
-    .catch((err) => {
-      return Promise.reject(err);
-    })
 }

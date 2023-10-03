@@ -73,12 +73,7 @@ describe('GET /api', () => {
 })
 
 describe('GET /api/articles/:article_id', () => {
-  it('should return a status 200', () => {
-    return request(app)
-      .get('/api/articles/3')
-      .expect(200);
-  })
-  it('should return the correct item from the table', () => {
+  it('should return a status 200 and the correct item from the table', () => {
     const article = {
       article_id: 3,
       title: "Eight pug gifs that remind me of mitch",
@@ -93,21 +88,12 @@ describe('GET /api/articles/:article_id', () => {
 
     return request(app)
       .get('/api/articles/3')
+      .expect(200)
       .then(({ body }) => {
         expect(Array.isArray(body.article)).not.toBe(true);
         expect(typeof body.article).toBe('object');
         expect(body.article.article_id).toBe(3);
         expect(body.article).toEqual(article);
-
-        expect(body.article).toHaveProperty('author', expect.any(String));
-        expect(body.article).toHaveProperty('title', expect.any(String));
-        expect(body.article).toHaveProperty('article_id', expect.any(Number));
-        expect(body.article).toHaveProperty('body', expect.any(String));
-        expect(body.article).toHaveProperty('topic', expect.any(String));
-        expect(body.article).toHaveProperty('created_at', expect.any(String));
-        expect(body.article).toHaveProperty('votes', expect.any(Number));
-        expect(body.article).toHaveProperty('article_img_url', expect.any(String));
-
       })
   })
   it('should return a status 404 and a message indicating the article doesnt exist when no such id is found', () => {

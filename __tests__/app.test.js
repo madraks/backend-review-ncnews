@@ -426,3 +426,43 @@ describe('PATCH /api/articles/:article_id', () => {
     })
   })
 });
+
+describe('DELETE /api/comments/:comment_id', () => {
+  it('should return a status 204 to confirm the comment has been successfully deleted', () => {
+    return request(app)
+    .delete('/api/comments/1')
+    .expect(204)
+  })
+  it('should return a status 404 when the comment id is not found', () => {
+    return request(app)
+    .delete('/api/comments/134')
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('404: Comment not found');
+    })
+  })
+  it('should return a status 400 when the comment id is not the correct data type', () => {
+    return request(app)
+    .delete('/api/comments/hello')
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Invalid ID')
+    })
+  })
+  it('should return a status 400 when SQL injection is attempted', () => {
+    return request(app)
+    .delete('/api/comments/1; DROP DATABASE nc_news;')
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Invalid ID')
+    })
+  })
+  it('should return a status 400 when a REAL number is put as the ID', () => {
+    return request(app)
+    .delete('/api/comments/1.3')
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Invalid ID')
+    })
+  })
+})

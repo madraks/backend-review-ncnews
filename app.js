@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
 const { getAllTopics } = require('./controllers/topics.controllers.js');
-const {getAllApis} = require('./controllers/api.controllers.js');
-const { getArticleById, getAllArticles, getAllCommentsByArticleId } = require('./controllers/articles.controllers.js');
+const { getAllApis } = require('./controllers/api.controllers.js');
+const { getArticleById, getAllArticles, getAllCommentsByArticleId, postComment } = require('./controllers/articles.controllers.js');
 
+app.use(express.json());
 
 app.get("/api", getAllApis);
 
@@ -15,25 +16,33 @@ app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles/:article_id/comments", getAllCommentsByArticleId)
 
-app.all("/*", (req, res, next) => {
-  res.status(404).send({ message: "404: Path not found"})
-})
+app.post("/api/articles/:article_id/comments", postComment);
 
 app.use((err, req, res, next) => {
-  if(err.status && err.message) {
-    res.status(err.status).send({message: err.message})
+  if (err.code === '22P02') {
+    res.status(400).send({ message: '400: Invalid ID' })
+  } else if (err.code === '23503') {
+    res.status(422).send({message: '422: User not found'})
+  } else if(err.code === '23502') {
+    res.status(400).send({message: '400: Bad request, NULL values'})
+  } else if(err.code === '42601') {
+    res.status(400).send({message: '400: Bad request, Invalid data. Too much data'})
   } else next(err);
 })
-
 app.use((err, req, res, next) => {
-  if(err.code === '22P02') {
-    res.status(400).send({message: '400: Invalid ID'})
+  if (err.status && err.message) {
+    res.status(err.status).send({ message: err.message })
+    return;
   } else next(err);
 })
 
 app.use((err, req, res, next) => {
   console.log(err)
-  res.status(500).send({message: "500: Internal Server Error"})
+  res.status(500).send({ message: "500: Internal Server Error" })
+})
+
+app.all("/*", (req, res) => {
+  res.status(404).send({ message: "404: Path not found" })
 })
 
 module.exports = app;

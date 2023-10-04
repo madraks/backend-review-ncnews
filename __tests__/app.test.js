@@ -256,3 +256,85 @@ describe('GET /api/articles/:article_id/comments', () => {
       })
   })
 })
+describe('POST /api/articles/:article_id/comments', () => {
+  it('should return a status 201 when inserted with a valid comment and EXISTING user and return the comment to the body', () => {
+    const newComment = { username: "rogersop", body: "I am not a rabbit"}
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send(newComment)
+    .expect(201)
+    .then(({body}) => {
+      expect(body.comment.comment_id).toBe(19);
+      expect(body.comment.body).toBe('I am not a rabbit')
+      expect(body.comment.article_id).toBe(7);
+      expect(body.comment.author).toBe('rogersop')
+      expect(body.comment.votes).toBe(0)
+      expect(body.comment).toHaveProperty('created_at', expect.any(String));
+    })
+  })
+  it('should return a 422 when inserted with a valid comment from a user that doesnt exist in the users table and return an error message', () => {
+    const newComment = { username: "PennyKoala", body: "I sell Eucalyptus"};
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send(newComment)
+    .expect(422)
+    .then(({body}) => {
+      expect(body.message).toBe('422: User not found')
+    })
+  })
+  it('should return a 404 when the article is not found and return an appropriate message', () => {
+    const newComment = { username: "rogersop", body: "I am not a rabbit"}
+    return request(app)
+    .post('/api/articles/364/comments')
+    .send(newComment)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('404: Article not found')
+    })
+  })
+  it('should return a 400 when sent an empty object', () => {
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send({})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, NULL values')
+    })
+  })
+  it('should return a 400 when sent an incomplete object', () => {
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send({username: 'anyName'})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, NULL values')
+    })
+  })
+  it('should return a 400 when sent an object with no relevant properties and response with approriate message for missing values', () => {
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send({faveInstrument: 'Bongos', faveShow: 'Adventure Time'})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, NULL values')
+    })
+  })
+  it('should return a 400 when sent an object with valid properties, but body is not explicitly a string type and username is valid', () => {
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send({username: 'rogersop', body: 123})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, Invalid data type')
+    })
+  })
+  it('should return a 400 when sent an object with valid properies, but body contains arrays and objects even when the user is valid', () => {
+    return request(app)
+    .post('/api/articles/7/comments')
+    .send({username: 'rogersop', body: [1,3,{hello: 'bro'}, 4]})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, Invalid data type')
+    })
+  })
+})

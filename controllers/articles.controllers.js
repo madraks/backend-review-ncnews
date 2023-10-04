@@ -1,5 +1,5 @@
-const { commentData } = require('../db/data/test-data/index.js');
-const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId } = require('../models/articles.models.js');
+const articles = require('../db/data/test-data/articles.js');
+const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId, insertComment } = require('../models/articles.models.js');
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -30,6 +30,20 @@ exports.getAllCommentsByArticleId = (req, res, next) => {
   return Promise.all(promises)
   .then(([article, comments]) => {
     res.status(200).send({comments});
+  })
+  .catch((err) => {
+    next(err)
+  })
+}
+
+exports.postComment = (req, res, next) => {
+  const {article_id} = req.params;
+  const comment = req.body;
+
+  const promises = [fetchArticleById(article_id), insertComment(article_id, comment)];
+  return Promise.all(promises)
+  .then(([article, comment]) => {
+    res.status(201).send({comment})
   })
   .catch((err) => {
     next(err)

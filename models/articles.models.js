@@ -1,4 +1,5 @@
 const db = require('../db/connection.js');
+const format = require('pg-format');
 
 exports.fetchArticleById = (articleId) => {
   if (isNaN(articleId)) {
@@ -59,5 +60,26 @@ exports.fetchAllCommentsByArticleId = (article_id) => {
   return db.query(query, [article_id])
     .then((result) => {
       return result.rows;
+    })
+}
+
+exports.insertComment = (article_id, comment) => {
+  
+  const date = new Date().toISOString();
+  const {username, body} = comment;
+
+
+  if(comment.hasOwnProperty('body') && typeof comment.body !== 'string') {
+    return Promise.reject({status: 400, message: '400: Bad request, Invalid data type'});
+  }
+
+  const formattedArray = [body, username, article_id]
+
+  const query = format(`INSERT INTO comments (body, author, article_id) VALUES %L RETURNING *;`,
+  [formattedArray]);
+
+  return db.query(query)
+    .then((result) => {
+      return result.rows[0];
     })
 }

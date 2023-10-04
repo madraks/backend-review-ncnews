@@ -106,5 +106,14 @@
     "exampleResponse": {
       "status": 204
     }
+  },
+  "GET /api/users": {
+    "description": "retrieves all users and their information",
+    "queries": [],
+    "exampleResponse": {
+      "username": "Scarface",
+      "name": "Harry Potter",
+      "avatar_url": "https://hogwartsdirectory.com/?w=700&h=700"
+    }
   }
 }

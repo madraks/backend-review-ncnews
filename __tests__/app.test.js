@@ -152,7 +152,7 @@ describe('GET /api/articles', () => {
     return request(app)
       .get('/api/articles')
       .then(({ body }) => {
-        expect(body.articles).toBeSortedBy('created_at', {descending: true})
+        expect(body.articles).toBeSortedBy('created_at', { descending: true })
       })
   })
   describe('GET /api/articles when the table is empty', () => {
@@ -201,9 +201,9 @@ describe('GET /api/articles/:article_id/comments', () => {
     return request(app)
       .get('/api/articles/1/comments')
       .expect(200)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.comments.length).toBe(11);
-        expect(body.comments).toBeSortedBy('created_at', {descending: true})
+        expect(body.comments).toBeSortedBy('created_at', { descending: true })
 
         body.comments.forEach((comment) => {
           expect(comment).toHaveProperty('comment_id', expect.any(Number))
@@ -219,23 +219,23 @@ describe('GET /api/articles/:article_id/comments', () => {
     return request(app)
       .get('/api/articles/272/comments')
       .expect(404)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.message).toBe('404: Article not found')
       })
   })
   it('should respond with a 200 status and empty array when the article exists, but there are no comments', () => {
     return request(app)
-    .get('/api/articles/4/comments')
-    .expect(200)
-    .then(({body}) => {
-      expect(body.comments).toEqual([]);
-    })
+      .get('/api/articles/4/comments')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toEqual([]);
+      })
   })
   it('should return a status 400 and an appropriate message when the article_id is not a number', () => {
     return request(app)
       .get('/api/articles/notanumber/comments')
       .expect(400)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.message).toBe('400: Bad request')
       })
   })
@@ -243,7 +243,7 @@ describe('GET /api/articles/:article_id/comments', () => {
     return request(app)
       .get('/api/articles/1.2/comments')
       .expect(400)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.message).toBe('400: Invalid ID');
       })
   })
@@ -251,218 +251,238 @@ describe('GET /api/articles/:article_id/comments', () => {
     return request(app)
       .get('/api/articles/1; DROP DATABASE nc_news;/comments')
       .expect(400)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.message).toBe('400: Bad request')
       })
   })
 })
 describe('POST /api/articles/:article_id/comments', () => {
   it('should return a status 201 when inserted with a valid comment and EXISTING user and return the comment to the body', () => {
-    const newComment = { username: "rogersop", body: "I am not a rabbit"}
+    const newComment = { username: "rogersop", body: "I am not a rabbit" }
     return request(app)
-    .post('/api/articles/7/comments')
-    .send(newComment)
-    .expect(201)
-    .then(({body}) => {
-      expect(body.comment.comment_id).toBe(19);
-      expect(body.comment.body).toBe('I am not a rabbit')
-      expect(body.comment.article_id).toBe(7);
-      expect(body.comment.author).toBe('rogersop')
-      expect(body.comment.votes).toBe(0)
-      expect(body.comment).toHaveProperty('created_at', expect.any(String));
-    })
+      .post('/api/articles/7/comments')
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment.comment_id).toBe(19);
+        expect(body.comment.body).toBe('I am not a rabbit')
+        expect(body.comment.article_id).toBe(7);
+        expect(body.comment.author).toBe('rogersop')
+        expect(body.comment.votes).toBe(0)
+        expect(body.comment).toHaveProperty('created_at', expect.any(String));
+      })
   })
   it('should return a 422 when inserted with a valid comment from a user that doesnt exist in the users table and return an error message', () => {
-    const newComment = { username: "PennyKoala", body: "I sell Eucalyptus"};
+    const newComment = { username: "PennyKoala", body: "I sell Eucalyptus" };
     return request(app)
-    .post('/api/articles/7/comments')
-    .send(newComment)
-    .expect(422)
-    .then(({body}) => {
-      expect(body.message).toBe('422: User not found')
-    })
+      .post('/api/articles/7/comments')
+      .send(newComment)
+      .expect(422)
+      .then(({ body }) => {
+        expect(body.message).toBe('422: User not found')
+      })
   })
   it('should return a 404 when the article is not found and return an appropriate message', () => {
-    const newComment = { username: "rogersop", body: "I am not a rabbit"}
+    const newComment = { username: "rogersop", body: "I am not a rabbit" }
     return request(app)
-    .post('/api/articles/364/comments')
-    .send(newComment)
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe('404: Article not found')
-    })
+      .post('/api/articles/364/comments')
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('404: Article not found')
+      })
   })
   it('should return a 400 when sent an empty object', () => {
     return request(app)
-    .post('/api/articles/7/comments')
-    .send({})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, NULL values')
-    })
+      .post('/api/articles/7/comments')
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, NULL values')
+      })
   })
   it('should return a 400 when sent an incomplete object', () => {
     return request(app)
-    .post('/api/articles/7/comments')
-    .send({username: 'anyName'})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, NULL values')
-    })
+      .post('/api/articles/7/comments')
+      .send({ username: 'anyName' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, NULL values')
+      })
   })
   it('should return a 400 when sent an object with no relevant properties and response with approriate message for missing values', () => {
     return request(app)
-    .post('/api/articles/7/comments')
-    .send({faveInstrument: 'Bongos', faveShow: 'Adventure Time'})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, NULL values')
-    })
+      .post('/api/articles/7/comments')
+      .send({ faveInstrument: 'Bongos', faveShow: 'Adventure Time' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, NULL values')
+      })
   })
   it('should return a 400 when sent an object with valid properties, but body is not explicitly a string type and username is valid', () => {
     return request(app)
-    .post('/api/articles/7/comments')
-    .send({username: 'rogersop', body: 123})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, Invalid data type')
-    })
+      .post('/api/articles/7/comments')
+      .send({ username: 'rogersop', body: 123 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, Invalid data type')
+      })
   })
   it('should return a 400 when sent an object with valid properies, but body contains arrays and objects even when the user is valid', () => {
     return request(app)
-    .post('/api/articles/7/comments')
-    .send({username: 'rogersop', body: [1,3,{hello: 'bro'}, 4]})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, Invalid data type')
-    })
+      .post('/api/articles/7/comments')
+      .send({ username: 'rogersop', body: [1, 3, { hello: 'bro' }, 4] })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, Invalid data type')
+      })
   })
 })
 describe('PATCH /api/articles/:article_id', () => {
   it('should return a status 200 and responds with the updated article when adding votes', () => {
-    const newVote = {inc_votes: 10}
+    const newVote = { inc_votes: 10 }
     return request(app)
-    .patch('/api/articles/1')
-    .send(newVote)
-    .expect(200)
-    .then(({body}) => {
-      expect(body.updatedArticle.article_id).toBe(1);
-      expect(body.updatedArticle.votes).toBe(110)
-    })
+      .patch('/api/articles/1')
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle.article_id).toBe(1);
+        expect(body.updatedArticle.votes).toBe(110)
+      })
   })
   it('should return a status 200 and responds with the updated article when subtracting votes', () => {
-    const newVote = {inc_votes: -10}
+    const newVote = { inc_votes: -10 }
     return request(app)
-    .patch('/api/articles/2')
-    .send(newVote)
-    .expect(200)
-    .then(({body}) => {
-      expect(body.updatedArticle.article_id).toBe(2)
-      expect(body.updatedArticle.votes).toBe(-10)
-    })
+      .patch('/api/articles/2')
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.updatedArticle.article_id).toBe(2)
+        expect(body.updatedArticle.votes).toBe(-10)
+      })
   })
   it('should return a 404 when the article doesnt exist and an appropriate message', () => {
-    const newVote = {inc_votes: -10}
+    const newVote = { inc_votes: -10 }
     return request(app)
-    .patch('/api/articles/342')
-    .send(newVote)
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe('404: Article not found');
-    })
+      .patch('/api/articles/342')
+      .send(newVote)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('404: Article not found');
+      })
   })
   it('should return a 400 when sent an empty object and an appropriate message', () => {
     return request(app)
-    .patch('/api/articles/2')
-    .send()
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, NULL values')
-    })
+      .patch('/api/articles/2')
+      .send()
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, NULL values')
+      })
   })
   it('should return a 400 when sent an object with the incorrect property but correct data type', () => {
     return request(app)
-    .patch('/api/articles/1')
-    .send({timesRead: 3})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, NULL values');
-    })
+      .patch('/api/articles/1')
+      .send({ timesRead: 3 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, NULL values');
+      })
   })
   it('should return a 400 when sent an object with the correct property but incorrect data type', () => {
     return request(app)
-    .patch('/api/articles/1')
-    .send({inc_votes: 'hello'})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, Invalid data type')
-    })
+      .patch('/api/articles/1')
+      .send({ inc_votes: 'hello' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, Invalid data type')
+      })
   })
   it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
     return request(app)
-    .patch('/api/articles/1')
-    .send({inc_votes: '-5'})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Bad request, Invalid data type')
-    })
+      .patch('/api/articles/1')
+      .send({ inc_votes: '-5' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, Invalid data type')
+      })
   })
   it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
     return request(app)
-    .patch('/api/articles/3')
-    .send({inc_votes: Number.MAX_SAFE_INTEGER + 1})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Numeric Overflow')
-    })
+      .patch('/api/articles/3')
+      .send({ inc_votes: Number.MAX_SAFE_INTEGER + 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Numeric Overflow')
+      })
   })
   it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
     return request(app)
-    .patch('/api/articles/3')
-    .send({inc_votes: Number.MIN_SAFE_INTEGER - 1})
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Numeric Overflow')
-    })
+      .patch('/api/articles/3')
+      .send({ inc_votes: Number.MIN_SAFE_INTEGER - 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Numeric Overflow')
+      })
   })
 });
 
 describe('DELETE /api/comments/:comment_id', () => {
   it('should return a status 204 to confirm the comment has been successfully deleted', () => {
     return request(app)
-    .delete('/api/comments/1')
-    .expect(204)
+      .delete('/api/comments/1')
+      .expect(204)
   })
   it('should return a status 404 when the comment id is not found', () => {
     return request(app)
-    .delete('/api/comments/134')
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe('404: Comment not found');
-    })
+      .delete('/api/comments/134')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('404: Comment not found');
+      })
   })
   it('should return a status 400 when the comment id is not the correct data type', () => {
     return request(app)
-    .delete('/api/comments/hello')
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Invalid ID')
-    })
+      .delete('/api/comments/hello')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Invalid ID')
+      })
   })
   it('should return a status 400 when SQL injection is attempted', () => {
     return request(app)
-    .delete('/api/comments/1; DROP DATABASE nc_news;')
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Invalid ID')
-    })
+      .delete('/api/comments/1; DROP DATABASE nc_news;')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Invalid ID')
+      })
   })
   it('should return a status 400 when a REAL number is put as the ID', () => {
     return request(app)
-    .delete('/api/comments/1.3')
-    .expect(400)
-    .then(({body}) => {
-      expect(body.message).toBe('400: Invalid ID')
-    })
+      .delete('/api/comments/1.3')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Invalid ID')
+      })
+  })
+})
+
+describe('GET /api/users', () => {
+  it('should return with a status 200 and an array of objects, each object with a valid user', () => {
+    const file = require('../db/data/test-data/users.js')
+    return request(app)
+      .get('/api/users')
+      .expect(200)
+      .then(({ body }) => {
+        expect(Array.isArray(body.users)).toBe(true)
+        expect(body.users).toEqual(file)
+        expect(body.users).toHaveLength(4)
+
+        body.users.forEach((user) => {
+          expect(user).toHaveProperty('username', expect.any(String))
+          expect(user).toHaveProperty('name', expect.any(String))
+          expect(user).toHaveProperty('avatar_url', expect.any(String))
+        })
+      })
   })
 })

@@ -1,4 +1,5 @@
-const { fetchArticleById, fetchAllArticles } = require('../models/articles.models.js');
+const { commentData } = require('../db/data/test-data/index.js');
+const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId } = require('../models/articles.models.js');
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -21,4 +22,16 @@ exports.getAllArticles = (req, res, next) => {
     .catch((err) => {
       next(err);
     })
+}
+
+exports.getAllCommentsByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+  const promises = [fetchArticleById(article_id), fetchAllCommentsByArticleId(article_id)];
+  return Promise.all(promises)
+  .then(([article, comments]) => {
+    res.status(200).send({comments});
+  })
+  .catch((err) => {
+    next(err)
+  })
 }

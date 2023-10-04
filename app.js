@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const { getAllTopics } = require('./controllers/topics.controllers.js');
 const {getAllApis} = require('./controllers/api.controllers.js');
-const { getArticleById, getAllArticles } = require('./controllers/articles.controllers.js');
+const { getArticleById, getAllArticles, getAllCommentsByArticleId } = require('./controllers/articles.controllers.js');
 
 
 app.get("/api", getAllApis);
@@ -12,6 +12,8 @@ app.get("/api/topics", getAllTopics);
 app.get('/api/articles', getAllArticles);
 
 app.get("/api/articles/:article_id", getArticleById);
+
+app.get("/api/articles/:article_id/comments", getAllCommentsByArticleId)
 
 app.all("/*", (req, res, next) => {
   res.status(404).send({ message: "404: Path not found"})

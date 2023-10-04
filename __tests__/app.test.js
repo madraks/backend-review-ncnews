@@ -215,20 +215,28 @@ describe('GET /api/articles/:article_id/comments', () => {
         })
       })
   })
-  it('should return an empty array when the article doesnt exist, but with a 200 status when passed a valid ID format', () => {
+  it('should respond with a 404 when the article id doesnt exist', () => {
     return request(app)
       .get('/api/articles/272/comments')
-      .expect(200)
+      .expect(404)
       .then(({body}) => {
-        expect(body.comments).toEqual([])
+        expect(body.message).toBe('404: Article not found')
       })
+  })
+  it('should respond with a 200 status and empty array when the article exists, but there are no comments', () => {
+    return request(app)
+    .get('/api/articles/4/comments')
+    .expect(200)
+    .then(({body}) => {
+      expect(body.comments).toEqual([]);
+    })
   })
   it('should return a status 400 and an appropriate message when the article_id is not a number', () => {
     return request(app)
       .get('/api/articles/notanumber/comments')
       .expect(400)
       .then(({body}) => {
-        expect(body.message).toBe('400: Bad request, article ID should be a number')
+        expect(body.message).toBe('400: Bad request')
       })
   })
   it('should return a status 400 when passed with a REAL', () => {
@@ -244,7 +252,7 @@ describe('GET /api/articles/:article_id/comments', () => {
       .get('/api/articles/1; DROP DATABASE nc_news;/comments')
       .expect(400)
       .then(({body}) => {
-        expect(body.message).toBe('400: Bad request, article ID should be a number')
+        expect(body.message).toBe('400: Bad request')
       })
   })
 })

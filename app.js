@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const { getAllTopics } = require('./controllers/topics.controllers.js');
 const { getAllApis } = require('./controllers/api.controllers.js');
-const { getArticleById, getAllArticles, getAllCommentsByArticleId, postComment } = require('./controllers/articles.controllers.js');
+const { getArticleById, getAllArticles, getAllCommentsByArticleId, postComment, patchArticleVotes } = require('./controllers/articles.controllers.js');
 
 app.use(express.json());
 
@@ -18,6 +18,8 @@ app.get("/api/articles/:article_id/comments", getAllCommentsByArticleId)
 
 app.post("/api/articles/:article_id/comments", postComment);
 
+app.patch("/api/articles/:article_id", patchArticleVotes);
+
 app.use((err, req, res, next) => {
   if (err.code === '22P02') {
     res.status(400).send({ message: '400: Invalid ID' })
@@ -27,6 +29,8 @@ app.use((err, req, res, next) => {
     res.status(400).send({message: '400: Bad request, NULL values'})
   } else if(err.code === '42601') {
     res.status(400).send({message: '400: Bad request, Invalid data. Too much data'})
+  } else if(err.code === '22003') {
+    res.status(400).send({message: '400: Numeric Overflow'})
   } else next(err);
 })
 app.use((err, req, res, next) => {

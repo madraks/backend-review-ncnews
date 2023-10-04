@@ -338,3 +338,91 @@ describe('POST /api/articles/:article_id/comments', () => {
     })
   })
 })
+describe('PATCH /api/articles/:article_id', () => {
+  it('should return a status 200 and responds with the updated article when adding votes', () => {
+    const newVote = {inc_votes: 10}
+    return request(app)
+    .patch('/api/articles/1')
+    .send(newVote)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.updatedArticle.article_id).toBe(1);
+      expect(body.updatedArticle.votes).toBe(110)
+    })
+  })
+  it('should return a status 200 and responds with the updated article when subtracting votes', () => {
+    const newVote = {inc_votes: -10}
+    return request(app)
+    .patch('/api/articles/2')
+    .send(newVote)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.updatedArticle.article_id).toBe(2)
+      expect(body.updatedArticle.votes).toBe(-10)
+    })
+  })
+  it('should return a 404 when the article doesnt exist and an appropriate message', () => {
+    const newVote = {inc_votes: -10}
+    return request(app)
+    .patch('/api/articles/342')
+    .send(newVote)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('404: Article not found');
+    })
+  })
+  it('should return a 400 when sent an empty object and an appropriate message', () => {
+    return request(app)
+    .patch('/api/articles/2')
+    .send()
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, NULL values')
+    })
+  })
+  it('should return a 400 when sent an object with the incorrect property but correct data type', () => {
+    return request(app)
+    .patch('/api/articles/1')
+    .send({timesRead: 3})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, NULL values');
+    })
+  })
+  it('should return a 400 when sent an object with the correct property but incorrect data type', () => {
+    return request(app)
+    .patch('/api/articles/1')
+    .send({inc_votes: 'hello'})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, Invalid data type')
+    })
+  })
+  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
+    return request(app)
+    .patch('/api/articles/1')
+    .send({inc_votes: '-5'})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Bad request, Invalid data type')
+    })
+  })
+  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
+    return request(app)
+    .patch('/api/articles/3')
+    .send({inc_votes: Number.MAX_SAFE_INTEGER + 1})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Numeric Overflow')
+    })
+  })
+  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
+    return request(app)
+    .patch('/api/articles/3')
+    .send({inc_votes: Number.MIN_SAFE_INTEGER - 1})
+    .expect(400)
+    .then(({body}) => {
+      expect(body.message).toBe('400: Numeric Overflow')
+    })
+  })
+});

@@ -83,3 +83,17 @@ exports.insertComment = (article_id, comment) => {
       return result.rows[0];
     })
 }
+
+exports.updateArticleVotes = (article_id, votes) => {
+  const array = [votes.inc_votes, article_id]
+  const query = `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`;
+
+  if(votes.hasOwnProperty('inc_votes') && typeof votes.inc_votes !== 'number') {
+    return Promise.reject({status: 400, message: '400: Bad request, Invalid data type'})
+  }
+
+  return db.query(query, array)
+    .then((result) => {
+      return result.rows[0]
+    })
+}

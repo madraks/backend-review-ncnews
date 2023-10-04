@@ -1,5 +1,5 @@
 const articles = require('../db/data/test-data/articles.js');
-const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId, insertComment } = require('../models/articles.models.js');
+const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId, insertComment, updateArticleVotes } = require('../models/articles.models.js');
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
@@ -47,5 +47,20 @@ exports.postComment = (req, res, next) => {
   })
   .catch((err) => {
     next(err)
+  })
+}
+
+exports.patchArticleVotes = (req, res, next) => {
+  const {article_id} = req.params;
+  const inc_votes = req.body;
+
+  const promises = [fetchArticleById(article_id), updateArticleVotes(article_id, inc_votes)];
+
+  return Promise.all(promises)
+  .then(([article, updatedArticle]) => {
+    res.status(200).send({updatedArticle})
+  })
+  .catch((err) => {
+    next(err);
   })
 }

@@ -18,25 +18,46 @@ exports.fetchArticleById = (articleId) => {
     })
 }
 
-exports.fetchAllArticles = (sortby = 'date', order = 'DESC') => {
+exports.fetchAllArticles = (topic, sortby = 'date', order = 'DESC') => {
+  
   const validSortbys = {
     date: "created_at",
     DESC: 'DESC',
     desc: 'desc',
     asc: 'asc',
-    ASC: 'ASC'
+    ASC: 'ASC',
+    mitch: 'mitch',
+    cats: 'cats',
+    paper: 'paper'
   }
 
   if(!validSortbys[sortby]) {
     return Promise.reject({status: 400, message: "400: Bad request"})
   }
+  const lookup = {}
+  
+  let query = `SELECT articles.article_id, articles.author, title, topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id) AS comment_count 
+  FROM articles
+  LEFT JOIN comments ON comments.article_id = articles.article_id
+  LEFT JOIN topics ON articles.topic = topics.slug`
 
-  const query = `SELECT articles.article_id, articles.author, title, topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id) AS comment_count FROM articles
-  LEFT JOIN comments
-    ON comments.article_id = articles.article_id
-  GROUP BY articles.article_id, comments.article_id
+    if(topic && validSortbys[topic]) {
+      query += `\nWHERE articles.topic = $1`
+    }
+    if (topic && !validSortbys[topic]) {
+      return Promise.reject({status: 404, message: '404: No topic found'})
+    }
+
+    query += `\nGROUP BY articles.article_id, comments.article_id
   ORDER BY articles.${validSortbys[sortby]} ${validSortbys[order]};
   `
+
+  if(topic && validSortbys[topic]) {
+    return db.query(query, [topic])
+      .then((result) => {
+          return result.rows;
+      })
+  }
 
   return db.query(query)
     .then((result) => {

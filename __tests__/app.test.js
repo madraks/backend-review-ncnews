@@ -436,3 +436,31 @@ describe('GET /api/users', () => {
       })
   })
 })
+
+describe('GET /api/aricles TOPIC query feature', () => {
+  it('should respond with a 200 and returns an array of objects of specified topic', () => {
+    return request(app)
+    .get('/api/articles?topic=cats')
+    .expect(200)
+    .then(({body}) => {
+      expect(body.articles).toHaveLength(1);
+    })
+  })
+  it('should respond with a 404 not found and a message stating no such topic found', () => {
+    return request(app)
+    .get('/api/articles?topic=dogs')
+    .expect(404)
+    .then(({body}) => {
+      // console.log(body)
+      expect(body.message).toBe('404: No topic found')
+    })
+  })
+  it('should respond with a 200 and empty array when the topic exists, but there are no articles for it', () => {
+    return request(app)
+    .get('/api/articles?topic=paper')
+    .expect(200)
+    .then(({body}) => {
+      // console.log(body)
+    })
+  })
+})

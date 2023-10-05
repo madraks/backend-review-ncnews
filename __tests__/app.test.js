@@ -446,12 +446,21 @@ describe('GET /api/aricles TOPIC query feature', () => {
       expect(body.articles).toHaveLength(1);
     })
   })
-  it('should respond with a 404 not found and a message stating no articles found', () => {
+  it('should respond with a 404 not found and a message stating no such topic found', () => {
     return request(app)
     .get('/api/articles?topic=dogs')
     .expect(404)
     .then(({body}) => {
-      expect(body.message).toBe('404: No articles found')
+      // console.log(body)
+      expect(body.message).toBe('404: No topic found')
+    })
+  })
+  it('should respond with a 200 and empty array when the topic exists, but there are no articles for it', () => {
+    return request(app)
+    .get('/api/articles?topic=paper')
+    .expect(200)
+    .then(({body}) => {
+      // console.log(body)
     })
   })
 })

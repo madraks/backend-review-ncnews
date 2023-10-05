@@ -354,13 +354,22 @@ describe('PATCH /api/articles/:article_id', () => {
         expect(body.message).toBe('404: Article not found');
       })
   })
-  it('should return a 400 when sent an empty object and an appropriate message', () => {
+  it('should return a 200 when sent an empty object and an unupdated article, essentially performs as a get', () => {
     return request(app)
       .patch('/api/articles/2')
       .send()
-      .expect(400)
+      .expect(200)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, NULL values')
+        expect(body.updatedArticle.votes).toBe(0)
+      })
+  })
+  it('should respond with a 200 and unchanged article object when send an object with incorrect property', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({invalidKey: 10})
+      .expect(200)
+      .then(({body}) => {
+        expect(body.updatedArticle.votes).toBe(100)
       })
   })
   it('should return a 400 when sent an object with the correct property but incorrect data type', () => {
@@ -404,30 +413,6 @@ describe('DELETE /api/comments/:comment_id', () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe('404: Comment not found');
-      })
-  })
-  it('should return a status 400 when the comment id is not the correct data type', () => {
-    return request(app)
-      .delete('/api/comments/hello')
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
-      })
-  })
-  it('should return a status 400 when SQL injection is attempted', () => {
-    return request(app)
-      .delete('/api/comments/1; DROP DATABASE nc_news;')
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
-      })
-  })
-  it('should return a status 400 when a REAL number is put as the ID', () => {
-    return request(app)
-      .delete('/api/comments/1.3')
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
 })

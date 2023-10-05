@@ -78,7 +78,7 @@ exports.insertComment = (article_id, comment) => {
     })
 }
 
-exports.updateArticleVotes = (article_id, votes) => {
+exports.updateArticleVotes = (article_id, votes = 0) => {
   
   const array = [votes, article_id]
   const query = `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`;

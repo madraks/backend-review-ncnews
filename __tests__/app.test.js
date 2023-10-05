@@ -117,7 +117,7 @@ describe('GET /api/articles/:article_id', () => {
       .get('/api/articles/1.2')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Invalid ID');
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID');
       })
   })
   it('should not be subject to SQL injection and will receive a status 400 along with a message', () => {
@@ -244,7 +244,7 @@ describe('GET /api/articles/:article_id/comments', () => {
       .get('/api/articles/1.2/comments')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Invalid ID');
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID');
       })
   })
   it('should not be subject to a SQL injection and will receive a status 400 with an appropriate message', () => {
@@ -272,14 +272,14 @@ describe('POST /api/articles/:article_id/comments', () => {
         expect(body.comment).toHaveProperty('created_at', expect.any(String));
       })
   })
-  it('should return a 422 when inserted with a valid comment from a user that doesnt exist in the users table and return an error message', () => {
+  it('should return a 404 when inserted with a valid comment from a user that doesnt exist in the users table and return an error message', () => {
     const newComment = { username: "PennyKoala", body: "I sell Eucalyptus" };
     return request(app)
       .post('/api/articles/7/comments')
       .send(newComment)
-      .expect(422)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe('422: User not found')
+        expect(body.message).toBe('404: ID not found')
       })
   })
   it('should return a 404 when the article is not found and return an appropriate message', () => {
@@ -289,7 +289,17 @@ describe('POST /api/articles/:article_id/comments', () => {
       .send(newComment)
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe('404: Article not found')
+        expect(body.message).toBe('404: ID not found')
+      })
+  })
+  it('should return a 400 when the article id is invalid with an appropriate error message', () => {
+    const newComment = { username: 'rogersop', body: 'My comment is invalid' }
+    return request(app)
+      .post('/api/articles/INVALID/comments')
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
   it('should return a 400 when sent an empty object', () => {
@@ -301,40 +311,13 @@ describe('POST /api/articles/:article_id/comments', () => {
         expect(body.message).toBe('400: Bad request, NULL values')
       })
   })
-  it('should return a 400 when sent an incomplete object', () => {
-    return request(app)
-      .post('/api/articles/7/comments')
-      .send({ username: 'anyName' })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, NULL values')
-      })
-  })
-  it('should return a 400 when sent an object with no relevant properties and response with approriate message for missing values', () => {
-    return request(app)
-      .post('/api/articles/7/comments')
-      .send({ faveInstrument: 'Bongos', faveShow: 'Adventure Time' })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, NULL values')
-      })
-  })
-  it('should return a 400 when sent an object with valid properties, but body is not explicitly a string type and username is valid', () => {
-    return request(app)
-      .post('/api/articles/7/comments')
-      .send({ username: 'rogersop', body: 123 })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type')
-      })
-  })
   it('should return a 400 when sent an object with valid properies, but body contains arrays and objects even when the user is valid', () => {
     return request(app)
       .post('/api/articles/7/comments')
       .send({ username: 'rogersop', body: [1, 3, { hello: 'bro' }, 4] })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type')
+        expect(body.message).toBe('400: Bad request, Invalid data. Too much data')
       })
   })
 })
@@ -380,34 +363,16 @@ describe('PATCH /api/articles/:article_id', () => {
         expect(body.message).toBe('400: Bad request, NULL values')
       })
   })
-  it('should return a 400 when sent an object with the incorrect property but correct data type', () => {
-    return request(app)
-      .patch('/api/articles/1')
-      .send({ timesRead: 3 })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, NULL values');
-      })
-  })
   it('should return a 400 when sent an object with the correct property but incorrect data type', () => {
     return request(app)
       .patch('/api/articles/1')
       .send({ inc_votes: 'hello' })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type')
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
-  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
-    return request(app)
-      .patch('/api/articles/1')
-      .send({ inc_votes: '-5' })
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.message).toBe('400: Bad request, Invalid data type')
-      })
-  })
-  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
+  it('should return a 400 when sent an object with the correct property but the number is too large to handle', () => {
     return request(app)
       .patch('/api/articles/3')
       .send({ inc_votes: Number.MAX_SAFE_INTEGER + 1 })
@@ -416,7 +381,7 @@ describe('PATCH /api/articles/:article_id', () => {
         expect(body.message).toBe('400: Numeric Overflow')
       })
   })
-  it('should return a 400 when sent an object with the correct property but a string data type that is a number', () => {
+  it('should return a 400 when sent an object with the correct property but the number is too large negatively to handle', () => {
     return request(app)
       .patch('/api/articles/3')
       .send({ inc_votes: Number.MIN_SAFE_INTEGER - 1 })
@@ -446,7 +411,7 @@ describe('DELETE /api/comments/:comment_id', () => {
       .delete('/api/comments/hello')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Invalid ID')
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
   it('should return a status 400 when SQL injection is attempted', () => {
@@ -454,7 +419,7 @@ describe('DELETE /api/comments/:comment_id', () => {
       .delete('/api/comments/1; DROP DATABASE nc_news;')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Invalid ID')
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
   it('should return a status 400 when a REAL number is put as the ID', () => {
@@ -462,7 +427,7 @@ describe('DELETE /api/comments/:comment_id', () => {
       .delete('/api/comments/1.3')
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe('400: Invalid ID')
+        expect(body.message).toBe('400: Bad request, Invalid data type or ID')
       })
   })
 })

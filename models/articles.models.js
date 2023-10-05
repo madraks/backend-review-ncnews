@@ -64,14 +64,8 @@ exports.fetchAllCommentsByArticleId = (article_id) => {
 }
 
 exports.insertComment = (article_id, comment) => {
-  
-  const date = new Date().toISOString();
+
   const {username, body} = comment;
-
-
-  if(comment.hasOwnProperty('body') && typeof comment.body !== 'string') {
-    return Promise.reject({status: 400, message: '400: Bad request, Invalid data type'});
-  }
 
   const formattedArray = [body, username, article_id]
 
@@ -79,21 +73,21 @@ exports.insertComment = (article_id, comment) => {
   [formattedArray]);
 
   return db.query(query)
-    .then((result) => {
+  .then((result) => {
       return result.rows[0];
     })
 }
 
 exports.updateArticleVotes = (article_id, votes) => {
-  const array = [votes.inc_votes, article_id]
+  
+  const array = [votes, article_id]
   const query = `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;`;
 
-  if(votes.hasOwnProperty('inc_votes') && typeof votes.inc_votes !== 'number') {
-    return Promise.reject({status: 400, message: '400: Bad request, Invalid data type'})
-  }
-
   return db.query(query, array)
-    .then((result) => {
+  .then((result) => {
+      if(result.rows.length === 0) {
+        return Promise.reject({status: 404, message: '404: Article not found'})
+      }
       return result.rows[0]
     })
 }

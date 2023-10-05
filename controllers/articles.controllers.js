@@ -40,9 +40,8 @@ exports.postComment = (req, res, next) => {
   const {article_id} = req.params;
   const comment = req.body;
 
-  const promises = [fetchArticleById(article_id), insertComment(article_id, comment)];
-  return Promise.all(promises)
-  .then(([article, comment]) => {
+  insertComment(article_id, comment)
+  .then((comment) => {
     res.status(201).send({comment})
   })
   .catch((err) => {
@@ -52,12 +51,10 @@ exports.postComment = (req, res, next) => {
 
 exports.patchArticleVotes = (req, res, next) => {
   const {article_id} = req.params;
-  const inc_votes = req.body;
+  const {inc_votes} = req.body;
 
-  const promises = [fetchArticleById(article_id), updateArticleVotes(article_id, inc_votes)];
-
-  return Promise.all(promises)
-  .then(([article, updatedArticle]) => {
+  updateArticleVotes(article_id, inc_votes)
+  .then((updatedArticle) => {
     res.status(200).send({updatedArticle})
   })
   .catch((err) => {

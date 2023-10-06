@@ -80,7 +80,6 @@ describe('GET /api/articles/:article_id', () => {
       topic: "mitch",
       author: "icellusedkars",
       body: "some gifs",
-      comment_count: "2",
       created_at: "2020-11-03T09:12:00.000Z",
       votes: 0,
       article_img_url:
@@ -132,11 +131,27 @@ describe('GET /api/articles/:article_id', () => {
   describe('feature request to count comments in article for GET /api/articles/:article_id', () => {
     it('should return a 200 and new request should contain a comment_count column for article', () => {
       return request(app)
-        .get('/api/articles/1')
+        .get('/api/articles/1?comments=true')
         .expect(200)
         .then(({body}) => {
           expect(body.article).toHaveProperty('comment_count', expect.any(String));
         })
+    })
+    it('should return an object without the comment_count column when the query is not valid', () => {
+      return request(app)
+        .get('/api/articles/1?comments=banana')
+        .expect(200)
+        .then(({body}) => {
+          expect(body.article).not.toHaveProperty('comment_count');
+        })
+    })
+    it('should return an object without the comment_count column when the query is false', () => {
+      return request(app)
+      .get('/api/articles/1?comments=FALSE')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.article).not.toHaveProperty('comment_count');
+      })
     })
   })
 })

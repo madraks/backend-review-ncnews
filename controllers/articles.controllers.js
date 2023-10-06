@@ -2,8 +2,9 @@ const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId, insertC
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
+  const { comments } = req.query;
   
-  fetchArticleById(article_id)
+  fetchArticleById(article_id, comments)
   .then((article) => {
     res.status(200).send({article});
   })

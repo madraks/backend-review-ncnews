@@ -114,7 +114,7 @@
   },
   "PATCH /api/articles/:article_id": {
     "description": "update an article's values of votes",
-    "queries": [],
+    "queries": ["comments"],
     "exampleResponse": {
       "updatedArticle": {
         "article_id": 1,

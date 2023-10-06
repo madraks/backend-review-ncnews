@@ -1,19 +1,29 @@
 const db = require('../db/connection.js');
 const format = require('pg-format');
 
-exports.fetchArticleById = (articleId) => {
+exports.fetchArticleById = (articleId, comments = false) => {
+  let query = ``;
+  const validQuery = {
+    true: true,
+    t: true,
+    TRUE: true,
+    false: false,
+    f: false,
+    FALSE: false
+  }
   if (isNaN(articleId)) {
     return Promise.reject({ status: 400, message: "400: Bad request"} )
   }
 
-  const query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.body, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles
-  LEFT JOIN comments ON comments.article_id = articles.article_id
-  WHERE articles.article_id = $1
-  GROUP BY comments.article_id, articles.article_id;
-`
-
-  // const query = `SELECT * FROM articles
-  // WHERE article_id = $1;`;
+  if (validQuery[comments]) {
+    query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.body, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
+    WHERE articles.article_id = $1
+    GROUP BY comments.article_id, articles.article_id;
+  `
+  } else {
+    query = `SELECT * FROM articles\nWHERE article_id = $1`
+  }
 
   return db.query(query, [articleId])
     .then((result) => {

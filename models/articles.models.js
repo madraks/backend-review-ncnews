@@ -6,8 +6,11 @@ exports.fetchArticleById = (articleId) => {
     return Promise.reject({ status: 400, message: "400: Bad request"} )
   }
 
-  const query = `SELECT * FROM articles
-  WHERE article_id = $1;`;
+  const query = `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.body, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.article_id) AS comment_count FROM articles
+  LEFT JOIN comments ON comments.article_id = articles.article_id
+  WHERE articles.article_id = $1
+  GROUP BY comments.article_id, articles.article_id;
+`;
 
   return db.query(query, [articleId])
     .then((result) => {
@@ -26,38 +29,46 @@ exports.fetchAllArticles = (topic, sortby = 'date', order = 'DESC') => {
     desc: 'desc',
     asc: 'asc',
     ASC: 'ASC',
-    mitch: 'mitch',
-    cats: 'cats',
-    paper: 'paper'
   }
 
   if(!validSortbys[sortby]) {
     return Promise.reject({status: 400, message: "400: Bad request"})
   }
-  const lookup = {}
   
   let query = `SELECT articles.article_id, articles.author, title, topic, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id) AS comment_count 
   FROM articles
   LEFT JOIN comments ON comments.article_id = articles.article_id
   LEFT JOIN topics ON articles.topic = topics.slug`
 
-    if(topic && validSortbys[topic]) {
-      query += `\nWHERE articles.topic = $1`
-    }
-    if (topic && !validSortbys[topic]) {
-      return Promise.reject({status: 404, message: '404: No topic found'})
-    }
+  if(topic) {
+    const lookup = {}
+    let query2 = query;
+    return db.query(`SELECT slug FROM topics;`)
+      .then((result) => {
+        result.rows.forEach((obj) => {
+          lookup[obj.slug] = obj.slug;
+        })
+        return lookup;
+      })
+      .then((map) => {
+        if (map[topic] === undefined) {
+          return Promise.reject({status: 404, message: '404: No topic found'})
+        } else {
+          query2 += `\nWHERE articles.topic = $1\nGROUP BY articles.article_id, comments.article_id\nORDER BY articles.${validSortbys[sortby]} ${validSortbys[order]} `
+        }
+        return query2;
+      })
+      .then((finalQuery) => {
+        return db.query(finalQuery, [topic])
+          .then((result) => {
+            return result.rows;
+          })
+      })
+  }
 
     query += `\nGROUP BY articles.article_id, comments.article_id
   ORDER BY articles.${validSortbys[sortby]} ${validSortbys[order]};
   `
-
-  if(topic && validSortbys[topic]) {
-    return db.query(query, [topic])
-      .then((result) => {
-          return result.rows;
-      })
-  }
 
   return db.query(query)
     .then((result) => {

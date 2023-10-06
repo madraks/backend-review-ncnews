@@ -1,4 +1,3 @@
-const articles = require('../db/data/test-data/articles.js');
 const { fetchArticleById, fetchAllArticles, fetchAllCommentsByArticleId, insertComment, updateArticleVotes } = require('../models/articles.models.js');
 
 exports.getArticleById = (req, res, next) => {

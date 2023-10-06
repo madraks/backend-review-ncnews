@@ -74,17 +74,6 @@ describe('GET /api', () => {
 
 describe('GET /api/articles/:article_id', () => {
   it('should return a status 200 and the correct item from the table', () => {
-    const article = {
-      article_id: 3,
-      title: "Eight pug gifs that remind me of mitch",
-      topic: "mitch",
-      author: "icellusedkars",
-      body: "some gifs",
-      created_at: "2020-11-03T09:12:00.000Z",
-      votes: 0,
-      article_img_url:
-        "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-    }
 
     return request(app)
       .get('/api/articles/3')
@@ -93,7 +82,14 @@ describe('GET /api/articles/:article_id', () => {
         expect(Array.isArray(body.article)).not.toBe(true);
         expect(typeof body.article).toBe('object');
         expect(body.article.article_id).toBe(3);
-        expect(body.article).toEqual(article);
+        expect(body.article).toHaveProperty('article_id', expect.any(Number))
+        expect(body.article).toHaveProperty('title', expect.any(String))
+        expect(body.article).toHaveProperty('topic', expect.any(String))
+        expect(body.article).toHaveProperty('author', expect.any(String))
+        expect(body.article).toHaveProperty('body', expect.any(String))
+        expect(body.article).toHaveProperty('created_at', expect.any(String))
+        expect(body.article).toHaveProperty('votes', expect.any(Number))
+        expect(body.article).toHaveProperty('article_img_url', expect.any(String))
       })
   })
   it('should return a status 404 and a message indicating the article doesnt exist when no such id is found', () => {
@@ -127,32 +123,6 @@ describe('GET /api/articles/:article_id', () => {
       .then(({ body }) => {
         expect(body.message).toBe('400: Bad request')
       })
-  })
-  describe('feature request to count comments in article for GET /api/articles/:article_id', () => {
-    it('should return a 200 and new request should contain a comment_count column for article', () => {
-      return request(app)
-        .get('/api/articles/1?comments=true')
-        .expect(200)
-        .then(({body}) => {
-          expect(body.article).toHaveProperty('comment_count', expect.any(String));
-        })
-    })
-    it('should return an object without the comment_count column when the query is not valid', () => {
-      return request(app)
-        .get('/api/articles/1?comments=banana')
-        .expect(200)
-        .then(({body}) => {
-          expect(body.article).not.toHaveProperty('comment_count');
-        })
-    })
-    it('should return an object without the comment_count column when the query is false', () => {
-      return request(app)
-      .get('/api/articles/1?comments=FALSE')
-      .expect(200)
-      .then(({body}) => {
-        expect(body.article).not.toHaveProperty('comment_count');
-      })
-    })
   })
 })
 describe('GET /api/articles', () => {
@@ -392,9 +362,9 @@ describe('PATCH /api/articles/:article_id', () => {
   it('should respond with a 200 and unchanged article object when send an object with incorrect property', () => {
     return request(app)
       .patch('/api/articles/1')
-      .send({invalidKey: 10})
+      .send({ invalidKey: 10 })
       .expect(200)
-      .then(({body}) => {
+      .then(({ body }) => {
         expect(body.updatedArticle.votes).toBe(100)
       })
   })
@@ -466,26 +436,37 @@ describe('GET /api/users', () => {
 describe('GET /api/articles TOPIC query feature', () => {
   it('should respond with a 200 and returns an array of objects of specified topic', () => {
     return request(app)
-    .get('/api/articles?topic=cats')
-    .expect(200)
-    .then(({body}) => {
-      expect(body.articles).toHaveLength(1);
-    })
+      .get('/api/articles?topic=cats')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(1);
+      })
   })
   it('should respond with a 404 not found and a message stating no such topic found', () => {
     return request(app)
-    .get('/api/articles?topic=dogs')
-    .expect(404)
-    .then(({body}) => {
-      expect(body.message).toBe('404: No topic found')
-    })
+      .get('/api/articles?topic=dogs')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe('404: No topic found')
+      })
   })
   it('should respond with a 200 and empty array when the topic exists, but there are no articles for it', () => {
     return request(app)
-    .get('/api/articles?topic=paper')
-    .expect(200)
-    .then(({body}) => {
-      expect(body.articles).toEqual([])
-    })
+      .get('/api/articles?topic=paper')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([])
+      })
+  })
+})
+
+describe('GET /api/articles/:article_id feature request to add a comment_count column', () => {
+  it('should return a 200 and new request should contain a comment_count column for article', () => {
+    return request(app)
+      .get('/api/articles/1')
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toHaveProperty('comment_count', expect.any(String));
+      })
   })
 })

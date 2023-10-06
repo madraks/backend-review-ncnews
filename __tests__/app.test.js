@@ -80,6 +80,7 @@ describe('GET /api/articles/:article_id', () => {
       topic: "mitch",
       author: "icellusedkars",
       body: "some gifs",
+      comment_count: "2",
       created_at: "2020-11-03T09:12:00.000Z",
       votes: 0,
       article_img_url:
@@ -127,6 +128,16 @@ describe('GET /api/articles/:article_id', () => {
       .then(({ body }) => {
         expect(body.message).toBe('400: Bad request')
       })
+  })
+  describe('feature request to count comments in article for GET /api/articles/:article_id', () => {
+    it('should return a 200 and new request should contain a comment_count column for article', () => {
+      return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body}) => {
+          expect(body.article).toHaveProperty('comment_count', expect.any(String));
+        })
+    })
   })
 })
 describe('GET /api/articles', () => {
@@ -437,7 +448,7 @@ describe('GET /api/users', () => {
   })
 })
 
-describe('GET /api/aricles TOPIC query feature', () => {
+describe('GET /api/articles TOPIC query feature', () => {
   it('should respond with a 200 and returns an array of objects of specified topic', () => {
     return request(app)
     .get('/api/articles?topic=cats')
@@ -451,7 +462,6 @@ describe('GET /api/aricles TOPIC query feature', () => {
     .get('/api/articles?topic=dogs')
     .expect(404)
     .then(({body}) => {
-      // console.log(body)
       expect(body.message).toBe('404: No topic found')
     })
   })
@@ -460,7 +470,7 @@ describe('GET /api/aricles TOPIC query feature', () => {
     .get('/api/articles?topic=paper')
     .expect(200)
     .then(({body}) => {
-      // console.log(body)
+      expect(body.articles).toEqual([])
     })
   })
 })

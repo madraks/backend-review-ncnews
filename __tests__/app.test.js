@@ -540,9 +540,23 @@ describe('GET /api/articles feature request, accept sort_by query and order quer
   })
 })
 
-// id: 'article_id',
-// author: 'author',
-// title: 'title',
-// votes: 'votes',
-// image: 'article_img_url',
-// comment: 'comment_count',
+describe('GET /api/users/:username', () => {
+  it('should return a 200 and an object when passed a valid username', () => {
+    return request(app)
+    .get('/api/users/butter_bridge')
+    .expect(200)
+    .then(({body}) => {
+      expect(body.user).toHaveProperty('username', expect.any(String))
+      expect(body.user).toHaveProperty('avatar_url', expect.any(String))
+      expect(body.user).toHaveProperty('name', expect.any(String))
+    })
+  })
+  it('should return a 404 when the user is not found', () => {
+    return request(app)
+    .get('/api/users/khabib')
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('404: User not found')
+    })
+  })
+});

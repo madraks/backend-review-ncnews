@@ -127,6 +127,25 @@
       ]
     }
   },
+  "POST /api/articles/": {
+    "description": "posts a new article to the database",
+    "input": {"author": "authorname", "title": "title", "body": "some text", "topic": "topic", "article_img_url": "default if not provided"},
+    "queries": [],
+    "exampleResponse": {
+      "newArticle": [
+        {
+          "article_id": 19,
+          "title": "Title",
+          "body": "This is an article content",
+          "author": "An author",
+          "votes": 0,
+          "article_img_url": "some url",
+          "created_at": "2020-01-01T03:08:00.000Z",
+          "comment_count": 0
+        }
+      ]
+    }
+  },
   "PATCH /api/articles/:article_id": {
     "description": "update an article's values of votes",
     "queries": [

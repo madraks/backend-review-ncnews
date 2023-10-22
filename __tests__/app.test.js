@@ -608,3 +608,69 @@ describe('PATCH /api/comments/:comment_id', () => {
     })
   })
 });
+
+describe('POST /api/articles', () => {
+  it('should return a status 201 and the newly added article', () => {
+    const article = { 
+      author: 'icellusedkars', 
+      title: 'Slug Apocalypse', 
+      body: 'There isn\'t enough salt in the world to deal with these pests. All my crops are dead.', 
+      topic: 'cats', 
+      article_img_url: 'https://images.unsplash.com/photo-1608393896503-75cfcdddc185?auto=format&fit=crop&q=60&w=500&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGRlYWQlMjBwbGFudHxlbnwwfHwwfHx8MA%3D%3D'}
+    return request(app)
+      .post('/api/articles')
+      .send(article)
+      .expect(201)
+      .then(({body}) => {
+        expect(body).toHaveProperty('article_id');
+        expect(body).toHaveProperty('title');
+        expect(body).toHaveProperty('topic');
+        expect(body).toHaveProperty('author');
+        expect(body).toHaveProperty('body');
+        expect(body).toHaveProperty('created_at');
+        expect(body).toHaveProperty('votes');
+        expect(body).toHaveProperty('article_img_url');
+        expect(body).toHaveProperty('comment_count');
+
+      })
+  })
+  it('should return a 201 when not given an article_img_url', () => {
+    const article = { 
+      author: 'icellusedkars', 
+      title: 'Slug Apocalypse', 
+      body: 'There isn\'t enough salt in the world to deal with these pests. All my crops are dead.', 
+      topic: 'cats'
+    }    
+    return request(app)
+      .post('/api/articles')
+      .send(article)
+      .expect(201)
+      .then(({body}) => {
+        expect(body.article_img_url).not.toBe(null);
+      })
+  })
+  it('should return a 404 when the author isnt in the list of users', () => {
+    const article = { 
+      author: 'Rakib', 
+      title: 'Slug Apocalypse', 
+      body: 'There isn\'t enough salt in the world to deal with these pests. All my crops are dead.', 
+      topic: 'cats'
+    }    
+    return request(app)
+      .post('/api/articles')
+      .send(article)
+      .expect(404)
+      .then(({body}) => {
+        expect(body.message).toBe('404: ID not found')
+      })
+  })
+  it('should return a 400 when trying to send an empty object', () => {
+    return request(app)
+      .post('/api/articles')
+      .send({})
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe('400: Bad request, NULL values')
+      })
+  })
+})

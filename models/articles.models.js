@@ -25,13 +25,18 @@ exports.fetchAllArticles = (topic, sortby = 'date', order = 'DESC') => {
   
   const validSortbys = {
     date: "created_at",
+    id: 'article_id',
+    author: 'author',
+    title: 'title',
+    votes: 'votes',
+    image: 'article_img_url',
     DESC: 'DESC',
     desc: 'desc',
     asc: 'asc',
     ASC: 'ASC',
   }
 
-  if(!validSortbys[sortby]) {
+  if(!validSortbys[sortby] || !validSortbys[order]) {
     return Promise.reject({status: 400, message: "400: Bad request"})
   }
   

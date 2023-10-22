@@ -26,10 +26,8 @@
   "GET /api/articles": {
     "description": "serves an array of all articles. default ordering by date created, in descending order",
     "queries": [
-      "author",
-      "topic",
-      "sort_by = created_at",
-      "order = desc"
+      {"sortBy": ["author", "id", "topic", "date", "votes", "title", "image"]},
+      {"order": ["desc", "asc", "DESC", "ASC"]}
     ],
     "exampleResponse": {
       "articles": [

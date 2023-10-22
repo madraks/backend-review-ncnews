@@ -26,8 +26,25 @@
   "GET /api/articles": {
     "description": "serves an array of all articles. default ordering by date created, in descending order",
     "queries": [
-      {"sortBy": ["author", "id", "topic", "date", "votes", "title", "image"]},
-      {"order": ["desc", "asc", "DESC", "ASC"]}
+      {
+        "sortBy": [
+          "author",
+          "id",
+          "topic",
+          "date",
+          "votes",
+          "title",
+          "image"
+        ]
+      },
+      {
+        "order": [
+          "desc",
+          "asc",
+          "DESC",
+          "ASC"
+        ]
+      }
     ],
     "exampleResponse": {
       "articles": [
@@ -112,7 +129,9 @@
   },
   "PATCH /api/articles/:article_id": {
     "description": "update an article's values of votes",
-    "queries": ["comments"],
+    "queries": [
+      "comments"
+    ],
     "exampleResponse": {
       "updatedArticle": {
         "article_id": 1,
@@ -135,6 +154,22 @@
   },
   "GET /api/users": {
     "description": "retrieves all users and their information",
+    "queries": [],
+    "exampleResponse": { "users" :
+      [{
+        "username": "Scarface",
+        "name": "Harry Potter",
+        "avatar_url": "https://hogwartsdirectory.com/?w=700&h=700"
+      },
+      {
+        "username": "HandleBarJackson",
+        "name": "Samuel L Jackson",
+        "avatar_url": "https://pulpfiction.com/?w=700&h=700"
+      }]
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "retrieves information of a single user, accessed through their username",
     "queries": [],
     "exampleResponse": {
       "username": "Scarface",

@@ -470,3 +470,79 @@ describe('GET /api/articles/:article_id feature request to add a comment_count c
       })
   })
 })
+
+describe('GET /api/articles feature request, accept sort_by query and order query', () => {
+  it('should return a 200 and an order of ascending', () => {
+    return request(app)
+      .get('/api/articles?order=asc')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('created_at', { descending: false })
+      }) 
+  })
+  it('should return an error status 400 when order query isnt valid', () => {
+    return request(app)
+      .get('/api/articles?order=thisiswrong')
+      .expect(400)
+      .then(({body}) => {
+        expect(body.message).toBe('400: Bad request')
+      })
+  })
+  describe('feature request sortby accepts all columns', () => {
+    it('should return a status 200 and should be sorted by id when passed id as a sortby', () => {
+      return request(app)
+        .get('/api/articles?sortBy=id')
+        .expect(200)
+        .then(({body}) => {
+          expect(body.articles).toBeSortedBy('article_id', {descending: true})
+        })
+    })
+    it('should return a status 200 when sortBy query is passed with author', () => {
+      return request(app)
+      .get('/api/articles?sortBy=author')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('author', {descending: true})
+      })
+    })
+    it('should return a status 200 when sortBy query is passed with title', () => {
+      return request(app)
+      .get('/api/articles?sortBy=title')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('title', {descending: true})
+      })
+    })
+    it('should return a status 200 when sortBy query is passed with votes', () => {
+      return request(app)
+      .get('/api/articles?sortBy=votes')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('votes', {descending: true})
+      })
+    })
+    it('should return a status 200 when sortBy query is passed with image', () => {
+      return request(app)
+      .get('/api/articles?sortBy=image')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('article_img_url', {descending: true})
+      })
+    })
+    it('should return a status 200 when sortBy query is passed with id and order is also passed with asc', () => {
+      return request(app)
+      .get('/api/articles?sortBy=id&order=asc')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeSortedBy('article_id', {descending: false})
+      })
+    })
+  })
+})
+
+// id: 'article_id',
+// author: 'author',
+// title: 'title',
+// votes: 'votes',
+// image: 'article_img_url',
+// comment: 'comment_count',

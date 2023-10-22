@@ -152,6 +152,18 @@
       "status": 204
     }
   },
+  "PATCH /api/comments/:comment_id": {
+    "description": "update an comments's values of votes",
+    "queries": [],
+    "exampleResponse": {
+          "comment_id": 19,
+          "body": "Superficially charming",
+          "article_id": 7,
+          "author": "rogersop",
+          "votes": 110,
+          "created_at": "2020-01-01T03:08:00.000Z"
+        }
+  },
   "GET /api/users": {
     "description": "retrieves all users and their information",
     "queries": [],

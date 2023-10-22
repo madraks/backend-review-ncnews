@@ -560,3 +560,51 @@ describe('GET /api/users/:username', () => {
     })
   })
 });
+
+describe('PATCH /api/comments/:comment_id', () => {
+  it('should return a status 200 and return the updated comment', () => {
+    const vote = { inc_votes: 1 }
+    return request(app)
+    .patch('/api/comments/3')
+    .send(vote)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.votes).toBe(101);
+      expect(body.comment_id).toBe(3);
+
+      expect(body).toHaveProperty('body');
+      expect(body).toHaveProperty('author');
+      expect(body).toHaveProperty('created_at');
+      expect(body).toHaveProperty('article_id');
+    })
+  })
+  it('should return a status 200 and return the updated comment when input with negative numbers', () => {
+    const vote = { inc_votes: -1 }
+    return request(app)
+    .patch('/api/comments/3')
+    .send(vote)
+    .expect(200)
+    .then(({body}) => {
+      expect(body.votes).toBe(99);
+    })
+  })
+  it('should return a 405 when the comment id is not found, but the body is correct', () => {
+    const vote = {inc_votes: 10}
+    return request(app)
+    .patch('/api/comments/53')
+    .send(vote)
+    .expect(404)
+    .then(({body}) => {
+      expect(body.message).toBe('404: Comment not found')
+    })
+  })
+  it('should return a 200 when an empty object is sent, and an unupdated comment', () => {
+    return request(app)
+    .patch('/api/comments/3')
+    .send({})
+    .expect(200)
+    .then(({body}) => {
+      expect(body.votes).toBe(100);
+    })
+  })
+});

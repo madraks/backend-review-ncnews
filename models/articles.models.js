@@ -75,7 +75,6 @@ exports.fetchAllArticles = (topic, sortby = 'date', order = 'DESC') => {
     query += `\nGROUP BY articles.article_id, comments.article_id
   ORDER BY articles.${validSortbys[sortby]} ${validSortbys[order]};
   `
-
   return db.query(query)
     .then((result) => {
       if(result.rows.length === 0) {

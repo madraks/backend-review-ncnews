@@ -45,7 +45,7 @@
           "ASC"
         ]
       },
-      "limit", "topic"
+      "topic"
     ],
     "exampleResponse": {
       "articles": [

@@ -31,6 +31,7 @@ exports.fetchAllArticles = (topic, sortby = 'date', order = 'DESC') => {
     title: 'title',
     votes: 'votes',
     image: 'article_img_url',
+    comment: 'comment_count',
     DESC: 'DESC',
     desc: 'desc',
     asc: 'asc',
